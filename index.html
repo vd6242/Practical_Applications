@@ -79,6 +79,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .over{color:var(--warn);font-weight:600}.ok{color:var(--accent);font-weight:600}
 .tip{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.tip:last-child{border:0}.tip em{font-style:normal;font-size:20px}
 .tbl select{min-height:36px;padding:5px 6px;max-width:170px}.tbl input[type=checkbox]{width:20px;min-height:20px;height:20px}
+.gh{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;margin:16px 0 8px;background:var(--bg);border-radius:6px}.gh span{color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
@@ -106,7 +107,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
   <button class='tab' role='tab' data-t='sav' aria-selected='false'>🌱 Savings &amp; cover</button>
   <button class='tab' role='tab' data-t='goals' aria-selected='false'>🎯 Goals</button>
   <button class='tab' role='tab' data-t='an' aria-selected='false'>📊 Analytics</button>
-  <button class='tab' role='tab' data-t='im' aria-selected='false'>📥 Import statement</button>
+  <button class='tab' role='tab' data-t='im' aria-selected='false'>📥 Import expenses</button>
 </div>
 
 <section class="panel on" id="p-exp">
@@ -133,7 +134,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
     <div class="card">
       <h2>Income</h2>
       <div class="row one"><div><label for="f-inc">Monthly take-home income</label><input type="number" id="f-inc" min="0" inputmode="decimal"></div></div>
-      <h2 style="margin-top:18px">Budget by category</h2>
+      <h2 style="margin-top:18px">Budget by group and category</h2>
       <div id="budgets"></div>
       <p class="note">Changes save automatically on this device.</p>
     </div>
@@ -168,9 +169,9 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 
 <section class='panel' id='p-im'>
   <div class='card k1'>
-    <h2>📥 Import a bank or credit card statement</h2>
-    <p class='note' style='margin:-6px 0 12px'>Download the monthly statement from net banking as CSV or Excel, choose its type, then upload it. Sorting into categories happens in your browser. Nothing is added until you approve it below.</p>
-    <div class='row'><div><label for='im-src'>Statement type</label><select id='im-src'><option value='bank'>Bank account</option><option value='card'>Credit card</option></select></div><div><label for='im-file'>Statement file</label><input type='file' id='im-file' accept='.csv,.xlsx,.xls'></div></div>
+    <h2>📥 Import expenses from Excel or a statement</h2>
+    <p class='note' style='margin:-6px 0 12px'>Upload an Excel expense sheet (the Expenses sheet of the template works as is, and rows are added to what you already have) or a bank or card statement as CSV or Excel. Choose the file type first. Sorting into categories happens in your browser. Nothing is added until you approve it below.</p>
+    <div class='row'><div><label for='im-src'>File type</label><select id='im-src'><option value='bank'>Bank account</option><option value='card'>Credit card</option><option value='sheet'>Excel expense sheet (Date, Category, Amount, Note)</option></select></div><div><label for='im-file'>Statement file</label><input type='file' id='im-file' accept='.csv,.xlsx,.xls'></div></div>
     <p class='note' id='im-msg' role='status'></p>
   </div>
   <div class='card' id='im-rev' hidden style='margin-top:18px'>
@@ -205,12 +206,23 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 </div>
 
 <script src="vendor/xlsx.full.min.js"></script>
+<script>window.XLSX||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>')</script>
 <script>
 (function(){
-var CATS=["Home","Rent","TV","Phone","Electricity","Driver","Diesel","Credit card","Loan","LIC Neha","LIC Shobhit","Term Insurance Shobhit","Term Insurance Neha","Car insurance","Education fees","Education expense","SIP","Travel local","Zomato","Dining","Travels","Groceries","Household help","Health","Shopping","Others"];
+var GROUPS=[["Home",["Rent","Electricity","Loan","Groceries","Household help"]],["Digital",["TV","Phone"]],["Travel",["Driver","Diesel","Travel local"]],["Leisure",["Credit card"]],["LIC",["LIC"]],["Shivank",["Education fees","Extra Tuitions"]],["Planned Savings",["SIP"]],["Food and Entertainment",["Zomato","Dining"]],["Pluto",["Pluto"]],["Other",["Others"]]];
+var GCOL={"Home":"#0F9D8A","Digital":"#5B5BD6","Travel":"#F2994A","Leisure":"#E5484D","LIC":"#2D9CDB","Shivank":"#9B51E0","Planned Savings":"#27AE60","Food and Entertainment":"#E0A800","Pluto":"#D6409F","Other":"#6C7A89"};
+var CATS=[],GROUP_OF={};GROUPS.forEach(function(g){g[1].forEach(function(c){CATS.push(c);GROUP_OF[c]=g[0]})});
+var MIG={"LIC Neha":"LIC","LIC Shobhit":"LIC","Education expense":"Extra Tuitions"};
+function catOpts(sel,skip){return GROUPS.map(function(g){return '<optgroup label="'+g[0]+'">'+g[1].map(function(c){return '<option'+(c===sel?' selected':'')+'>'+c+'</option>'}).join('')+'</optgroup>'}).join('')+(skip?'<option'+(sel==='Skip'?' selected':'')+'>Skip</option>':'')}
 var KEY="homefin-v1";
 var S={inc:0,emi:0,rent:0,ins:0,budgets:{},expenses:[],goals:[]};
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
+function migrate(){var ch=false;S.learn=S.learn||{};
+  (S.expenses||[]).forEach(function(x){if(CATS.indexOf(x.cat)<0){x.cat=MIG[x.cat]||"Others";ch=true}});
+  var nb={};Object.keys(S.budgets||{}).forEach(function(k){var t=CATS.indexOf(k)>-1?k:(MIG[k]||"Others");if(t!==k)ch=true;nb[t]=(nb[t]||0)+(S.budgets[k]||0)});S.budgets=nb;
+  Object.keys(S.learn).forEach(function(k){var v=S.learn[k];if(v!=="Skip"&&CATS.indexOf(v)<0){S.learn[k]=MIG[v]||"Others";ch=true}});
+  if(ch)save();}
+migrate();
 function save(){S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(window.__push)window.__push()}
 function $(id){return document.getElementById(id)}
 function n(v){v=parseFloat(v);return isFinite(v)&&v>0?v:0}
@@ -219,7 +231,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&am
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 var month=today().slice(0,7);
 $("month").value=month;$("e-date").value=today();
-$("e-cat").innerHTML=CATS.map(function(c){return "<option>"+c+"</option>"}).join("");
+$("e-cat").innerHTML=catOpts();
 
 // tabs
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){
@@ -234,9 +246,7 @@ $("month").addEventListener("change",function(){month=this.value||month;render()
   var el=$("f-"+k);el.value=S[k]||"";
   el.addEventListener("input",function(){S[k]=n(el.value);save();renderSummary();renderBars()});
 });
-$("budgets").innerHTML=CATS.map(function(c,i){
-  return '<div class="row one" style="margin-bottom:8px"><div><label for="b'+i+'">'+c+'</label><input type="number" id="b'+i+'" min="0" inputmode="decimal" value="'+(S.budgets[c]||"")+'"></div></div>';
-}).join("");
+$("budgets").innerHTML=GROUPS.map(function(g,gx){return '<div class="gh" style="border-left:5px solid '+GCOL[g[0]]+'"><b>'+g[0]+'</b><span id="gt'+gx+'"></span></div>'+g[1].map(function(c){var i=CATS.indexOf(c);return '<div class="row one" style="margin-bottom:8px"><div><label for="b'+i+'">'+c+'</label><input type="number" id="b'+i+'" min="0" inputmode="decimal" value="'+(S.budgets[c]||"")+'"></div></div>'}).join("")}).join("");
 CATS.forEach(function(c,i){$("b"+i).addEventListener("input",function(){S.budgets[c]=n(this.value);save();renderSummary();renderBars()})});
 
 // expenses
@@ -293,10 +303,12 @@ function renderList(){
 }
 function renderBars(){
   var t=totals();
-  $("catbars").innerHTML=CATS.map(function(c){
-    var b=S.budgets[c]||0,s=t.by[c]||0,pct=b?Math.min(100,s/b*100):(s?100:0),over=b?s>b:s>0;
-    return '<div class="cat"><div class="t"><span>'+c+'</span><small>'+inr(s)+(b?" of "+inr(b):" (no budget)")+'</small></div><div class="bar"><i class="'+(over?"over":"")+'" style="width:'+pct+'%;'+(over?"":"background:"+col(c))+'"></i></div></div>';
-  }).join("")+'<p class="note">Goal contributions: '+inr(t.goals)+' · Planned spending: '+inr(t.budget)+' · Unplanned balance: <b class="'+(S.inc-t.fixed-t.budget-t.goals<0?"neg":"")+'">'+inr(S.inc-t.fixed-t.budget-t.goals)+'</b></p>';
+  function bar(b,s,color){var pct=b?Math.min(100,s/b*100):(s?100:0),over=b?s>b:s>0;return '<div class="bar"><i class="'+(over?"over":"")+'" style="width:'+pct+'%;'+(over?"":"background:"+color)+'"></i></div>'}
+  $("catbars").innerHTML=GROUPS.map(function(g,gx){
+    var gc=GCOL[g[0]],gb=0,gs=0;g[1].forEach(function(c){gb+=S.budgets[c]||0;gs+=t.by[c]||0});
+    var el=$("gt"+gx);if(el)el.textContent=inr(gb)+" budget";
+    return '<div class="cat" style="border-left:5px solid '+gc+';padding-left:10px;margin-bottom:18px"><div class="t"><b>'+g[0]+'</b><small>'+inr(gs)+(gb?" of "+inr(gb):" (no budget)")+'</small></div>'+bar(gb,gs,gc)+g[1].map(function(c){var b=S.budgets[c]||0,s=t.by[c]||0;return '<div style="margin-top:8px"><div class="t"><span>'+c+'</span><small>'+inr(s)+(b?" of "+inr(b):" (no budget)")+'</small></div>'+bar(b,s,gc)+'</div>'}).join("")+'</div>';
+  }).join("")+'<p class="note">Goal contributions: '+inr(t.goals)+' \u00b7 Planned spending: '+inr(t.budget)+' \u00b7 Unplanned balance: <b class="'+(S.inc-t.fixed-t.budget-t.goals<0?"neg":"")+'">'+inr(S.inc-t.fixed-t.budget-t.goals)+'</b></p>';
 }
 function renderGoals(){
   $("g-list").innerHTML=S.goals.length?S.goals.map(function(g){
@@ -309,7 +321,7 @@ function renderGoals(){
 function render(){renderSummary();renderList();renderBars();renderGoals();renderSav();renderAn();renderPer();renderTips()}
 S.savings=S.savings||[];S.term=S.term||[];S.learn=S.learn||{};
 var PAL=['#0F9D8A','#5B5BD6','#F2994A','#E5484D','#2D9CDB','#9B51E0','#27AE60','#E0A800','#D6409F','#6C7A89'];
-function col(c){return PAL[Math.max(0,CATS.indexOf(c))%PAL.length]}
+function col(c){return GCOL[GROUP_OF[c]]||'#6C7A89'}
 function fv(p,ret,yrs){var r=ret/1200,m=yrs*12;return r?p*((Math.pow(1+r,m)-1)/r)*(1+r):p*m}
 function sum(a,k){return a.reduce(function(s,x){return s+(x[k]||0)},0)}
 $('sv-add').addEventListener('click',function(){var nm=$('sv-name').value.trim(),mo=n($('sv-mo').value);if(!nm||!mo)return;S.savings.push({id:Date.now()+Math.random(),name:nm.slice(0,50),monthly:mo,ret:n($('sv-ret').value),yrs:n($('sv-yrs').value)});save();['sv-name','sv-mo','sv-ret','sv-yrs'].forEach(function(i){$(i).value=''});render()});
@@ -328,11 +340,12 @@ function renderAn(){
   for(var i=5;i>=0;i--){var d=new Date(y,mo-1-i,1);ms.push({k:d.getFullYear()+'-'+pad(d.getMonth()+1),l:d.toLocaleString('en-IN',{month:'short'}),v:0})}
   S.expenses.forEach(function(x){ms.forEach(function(m){if(x.date.slice(0,7)===m.k)m.v+=x.amt})});
   var mx=Math.max.apply(null,ms.map(function(m){return m.v}).concat([t.budget,1]));
-  var acc=0,seg=ent.map(function(e){var a=acc/t.spent*100;acc+=e[1];return col(e[0])+' '+a+'% '+acc/t.spent*100+'%'}).join(',');
+  var gm={};ent.forEach(function(e){var g=GROUP_OF[e[0]]||'Other';gm[g]=(gm[g]||0)+e[1]});var ge=Object.keys(gm).map(function(g){return [g,gm[g]]}).sort(function(a,b){return b[1]-a[1]});
+  var acc=0,seg=ge.map(function(e){var a=acc/t.spent*100;acc+=e[1];return GCOL[e[0]]+' '+a+'% '+acc/t.spent*100+'%'}).join(',');
   var md={};t.ex.forEach(function(x){md[x.mode]=(md[x.mode]||0)+x.amt});
   var mdl=Object.keys(md).sort(function(a,b){return md[b]-md[a]});
   $('an').innerHTML=`<div class='kpis'><div class='kpi' style='background:#5B5BD6'><span>Budget used</span><b>${t.budget?pct+'%':'–'}</b></div><div class='kpi' style='background:#0F9D8A'><span>Saved or set aside</span><b>${S.inc?Math.round(sv/S.inc*100)+'%':'–'}</b></div><div class='kpi' style='background:#F2994A'><span>Term cover vs yearly income</span><b>${S.inc&&cov?(cov/(S.inc*12)).toFixed(1)+'×':'–'}</b></div><div class='kpi' style='background:#E5484D'><span>Biggest spend</span><b>${ent[0]?esc(ent[0][0]):'–'}</b></div></div>`+
-  `<div class='grid two'><div class='card k1'><h2>Where the money went</h2>${t.spent?`<div class='dn'><div class='donut' style='background:conic-gradient(${seg})' role='img' aria-label='Spending by category'></div><div class='lg'>${ent.slice(0,8).map(function(e){return `<div><i style='background:${col(e[0])}'></i><span>${esc(e[0])}</span><b>${inr(e[1])}</b> <small>${Math.round(e[1]/t.spent*100)}%</small></div>`}).join('')}</div></div>`:"<p class='empty'>No spending logged for this month yet.</p>"}</div>`+
+  `<div class='grid two'><div class='card k1'><h2>Where the money went, by group</h2>${t.spent?`<div class='dn'><div class='donut' style='background:conic-gradient(${seg})' role='img' aria-label='Spending by category'></div><div class='lg'>${ge.map(function(e){return `<div><i style='background:${GCOL[e[0]]}'></i><span>${esc(e[0])}</span><b>${inr(e[1])}</b> <small>${Math.round(e[1]/t.spent*100)}%</small></div>`}).join('')}</div></div>`:"<p class='empty'>No spending logged for this month yet.</p>"}</div>`+
   `<div class='card k2'><h2>Last 6 months</h2><div class='tr'>${ms.map(function(m){return `<div class='col'><div class='ar'><i style='height:${m.v/mx*100}%' title='${inr(m.v)}'></i>${t.budget?`<u style='bottom:${t.budget/mx*100}%'></u>`:''}</div>${m.l}</div>`}).join('')}</div><p class='note'>Bars show what you spent each month.${t.budget?' The dashed line is your total monthly budget of '+inr(t.budget)+'.':''}</p></div></div>`+
   `<div class='card k3' style='margin-top:18px'><h2>How you paid this month</h2>${mdl.length?mdl.map(function(k,i){return `<div class='cat'><div class='t'><span>${esc(k)}</span><small>${inr(md[k])} · ${Math.round(md[k]/t.spent*100)}%</small></div><div class='bar'><i style='width:${md[k]/t.spent*100}%;background:${PAL[i%PAL.length]}'></i></div></div>`}).join(''):"<p class='empty'>Nothing to show yet.</p>"}</div>`;
 }
@@ -349,9 +362,12 @@ function renderPer(){
   var P=periods(),t=totals(),A=P.map(function(p){return actual(p.keys)}),C=['#5B5BD6','#0F9D8A','#F2994A'];
   var cards=P.map(function(p,i){var bud=t.budget*p.keys.length,act=A[i].tot,over=bud&&act>bud,pc=bud?Math.min(100,act/bud*100):(act?100:0);
     return `<div class='card' style='border-top:4px solid ${C[i]}'><b>${p.n}</b> <small style='color:var(--muted)'>${p.l}</small><div style='font-size:22px;font-weight:700;margin:6px 0'>${inr(act)}</div><small>Budget ${inr(bud)}</small><div class='bar'><i class='${over?'over':''}' style='width:${pc}%;background:${over?'':C[i]}'></i></div><p class='note' style='margin:6px 0 0'>${bud?(over?`<span class='over'>${inr(act-bud)} over budget</span>`:`<span class='ok'>${inr(bud-act)} under budget</span>`):'Set budgets to compare'}</p></div>`}).join('');
-  var cats=CATS.filter(function(c){return (S.budgets[c]||0)>0||A[2].by[c]});
-  var rows=cats.map(function(c){return `<tr><td>${esc(c)}</td>`+P.map(function(p,i){var a=A[i].by[c]||0,b=(S.budgets[c]||0)*p.keys.length;return `<td class='${b&&a>b?'over':''}'>${inr(a)} / ${inr(b)}</td>`}).join('')+'</tr>'}).join('');
-  var html=`<h2 style='margin:4px 0 10px'>Budget vs actual</h2><div class='pcards'>${cards}</div><div class='card' style='margin:18px 0'><h2>By category (actual / budget)</h2><div class='scroll'><table class='tbl'><tr><th>Category</th>${P.map(function(p){return '<th>'+p.n+'</th>'}).join('')}</tr>${rows||"<tr><td colspan='4'>Set budgets or log expenses to see this table.</td></tr>"}</table></div><p class='note'>Budget is your monthly budget times the months in each period. The financial year runs April to March (${P[2].l}). Periods end at the month chosen at the top.</p></div>`;
+  var rows=GROUPS.map(function(g){
+    var cs=g[1].filter(function(c){return (S.budgets[c]||0)>0||A[2].by[c]});if(!cs.length)return '';
+    var gr='<tr style="background:var(--bg)"><td><b style="color:'+GCOL[g[0]]+'">'+esc(g[0])+'</b></td>'+P.map(function(p,i){var a=0,b=0;g[1].forEach(function(c){a+=A[i].by[c]||0;b+=(S.budgets[c]||0)*p.keys.length});return '<td class="'+(b&&a>b?'over':'')+'"><b>'+inr(a)+' / '+inr(b)+'</b></td>'}).join('')+'</tr>';
+    return gr+cs.map(function(c){return '<tr><td>&nbsp;&nbsp;'+esc(c)+'</td>'+P.map(function(p,i){var a=A[i].by[c]||0,b=(S.budgets[c]||0)*p.keys.length;return '<td class="'+(b&&a>b?'over':'')+'">'+inr(a)+' / '+inr(b)+'</td>'}).join('')+'</tr>'}).join('');
+  }).join('');
+  var html=`<h2 style='margin:4px 0 10px'>Budget vs actual</h2><div class='pcards'>${cards}</div><div class='card' style='margin:18px 0'><h2>By group and category (actual / budget)</h2><div class='scroll'><table class='tbl'><tr><th>Category</th>${P.map(function(p){return '<th>'+p.n+'</th>'}).join('')}</tr>${rows||"<tr><td colspan='4'>Set budgets or log expenses to see this table.</td></tr>"}</table></div><p class='note'>Budget is your monthly budget times the months in each period. The financial year runs April to March (${P[2].l}). Periods end at the month chosen at the top.</p></div>`;
   var k=$('an').querySelector('.kpis');if(k)k.insertAdjacentHTML('afterend',html);
 }
 function renderTips(){
@@ -373,7 +389,7 @@ function renderTips(){
   $('an').insertAdjacentHTML('beforeend',`<div class='card k1' style='margin-top:18px'><h2>Suggestions for savings and investments</h2>${T.map(function(x){return `<div class='tip'><em>${x[0]}</em><div><b>${x[1]}</b><div class='note' style='margin:2px 0 0'>${x[2]}</div></div></div>`}).join('')}<p class='note'>General ideas based on the numbers you entered, not personal financial advice. Consider a SEBI-registered adviser before big decisions.</p></div>`);
 }
 var ST=[],SRC='bank';
-var RULES=[['Zomato',/zomato|swiggy|eatsure|magicpin/i],['Groceries',/bigbasket|blinkit|zepto|instamart|dmart|avenue supermarts|reliance fresh|reliance smart|more retail|grocer|kirana|jiomart|milk|vegetable|fruit/i],['Dining',/restaurant|cafe|coffee|starbucks|barbeque|dominos|pizza|mcdonald|kfc|burger|dining|bakery|biryani|haldiram|dhaba/i],['Electricity',/electric|bses|tata power|uppcl|discom|power bill|torrent power|bijli|mvvnl|pvvnl/i],['Phone',/airtel|(?<![a-z])jio(?![a-z])|vodafone|(?<![a-z])vi(?![a-z])|bsnl|recharge|postpaid|broadband|fibernet/i],['TV',/tata ?play|tatasky|dish ?tv|d2h|sun ?direct|netflix|hotstar|prime video|jiocinema|sony ?liv|youtube|spotify|zee5/i],['Diesel',/petrol|diesel|fuel|hpcl|bpcl|iocl|indian oil|nayara|bharat petroleum|hindustan petroleum/i],['Travel local',/uber|(?<![a-z])ola(?![a-z])|rapido|metro|dmrc|fastag|parking|(?<![a-z])toll(?![a-z])|namma yatri/i],['Travels',/makemytrip|goibibo|irctc|indigo|air india|vistara|akasa|cleartrip|ixigo|redbus|airbnb|oyo|yatra|booking[.]com|agoda/i],['Education fees',/school|tuition|college|university|admission/i],['Education expense',/(?<![a-z])books?(?![a-z])|stationery|byju|unacademy|coaching|udemy|coursera|vedantu/i],['Health',/pharm|apollo|medplus|1mg|netmeds|hospital|clinic|diagnostic|pathology|lal path|thyrocare|dental|medical|doctor/i],['Shopping',/amazon|flipkart|myntra|ajio|nykaa|meesho|lifestyle|westside|decathlon|croma|reliance digital|ikea|pantaloons|max fashion|zara|tata cliq/i],['Home',/urban ?company|urbanclap|furniture|pepperfry|hardware|plumb|carpent|repair|paint/i],['Rent',/(?<![a-z])rent(?![a-z])|nobroker|nestaway|housing[.]com/i],['Loan',/(?<![a-z])emi(?![a-z])|loan|hdfc ltd|lic housing|bajaj fin|home fin/i],['SIP',/(?<![a-z])sip(?![a-z])|mutual fund|groww|zerodha|nippon|mirae|(?<![a-z])mf(?![a-z])|bse star|cams|kfin|(?<![a-z])ppf(?![a-z])|(?<![a-z])nps(?![a-z])/i],['Car insurance',/car insurance|motor insurance|acko|digit insurance/i],['Household help',/maid|cook|house ?help|domestic|helper/i],['Driver',/driver/i],['LIC Neha',/(?<![a-z])lic(?![a-z])|life insurance corp/i,1],['Term Insurance Neha',/term plan|term insurance|max life|hdfc life|tata aia|icici pru|pnb metlife|sbi life|bajaj allianz life/i,1]];
+var RULES=[['Zomato',/zomato|swiggy|eatsure|magicpin/i],['Groceries',/bigbasket|blinkit|zepto|instamart|dmart|avenue supermarts|reliance fresh|reliance smart|more retail|grocer|kirana|jiomart|milk|vegetable|fruit/i],['Dining',/restaurant|cafe|coffee|starbucks|barbeque|dominos|pizza|mcdonald|kfc|burger|dining|bakery|biryani|haldiram|dhaba/i],['Electricity',/electric|bses|tata power|uppcl|discom|power bill|torrent power|bijli|mvvnl|pvvnl/i],['Phone',/airtel|(?<![a-z])jio(?![a-z])|vodafone|(?<![a-z])vi(?![a-z])|bsnl|recharge|postpaid|broadband|fibernet/i],['TV',/tata ?play|tatasky|dish ?tv|d2h|sun ?direct|netflix|hotstar|prime video|jiocinema|sony ?liv|youtube|spotify|zee5/i],['Diesel',/petrol|diesel|fuel|hpcl|bpcl|iocl|indian oil|nayara|bharat petroleum|hindustan petroleum/i],['Travel local',/uber|(?<![a-z])ola(?![a-z])|rapido|metro|dmrc|fastag|parking|(?<![a-z])toll(?![a-z])|namma yatri/i],['Extra Tuitions',/tuition|coaching|byju|unacademy|vedantu|udemy|coursera/i],['Education fees',/school|college|university|admission/i],['Rent',/(?<![a-z])rent(?![a-z])|nobroker|nestaway|housing[.]com/i],['Loan',/(?<![a-z])emi(?![a-z])|loan|hdfc ltd|lic housing|bajaj fin|home fin/i],['SIP',/(?<![a-z])sip(?![a-z])|mutual fund|groww|zerodha|nippon|mirae|(?<![a-z])mf(?![a-z])|bse star|cams|kfin|(?<![a-z])ppf(?![a-z])|(?<![a-z])nps(?![a-z])/i],['Household help',/maid|cook|house ?help|domestic|helper/i],['Driver',/driver/i],['LIC',/(?<![a-z])lic(?![a-z])|life insurance corp/i],['Pluto',/pluto/i]];
 function mk(d){return String(d).toLowerCase().replace(/upi|neft|imps|rtgs|pos|nach|ach|ecs|[0-9]+|[^a-z ]+/g,' ').replace(/ +/g,' ').trim().split(' ').slice(0,3).join(' ')}
 function guess(d,type){
   var k=mk(d);if(k&&S.learn[k])return {c:S.learn[k],q:'learned'};
@@ -410,6 +426,21 @@ function parseStmt(rows,type){
   }
   return {rows:out,credits:credits};
 }
+function parseSheet(rows){
+  var hi=-1,H=[];
+  for(var i=0;i<Math.min(rows.length,40)&&hi<0;i++){var r=rows[i].map(function(c){return String(c).toLowerCase()});if(r.some(function(c){return /date/.test(c)})&&r.some(function(c){return /amount|amt/.test(c)})){hi=i;H=r}}
+  if(hi<0)return null;
+  function f(re){return H.findIndex(function(c){return re.test(c)})}
+  var cd=f(/date/),ca=f(/amount|amt/),cc=f(/categor/),cm=f(/paid|mode|method/),cn=f(/note|description|narration|details|remarks|particulars/),out=[];
+  for(var j=hi+1;j<rows.length;j++){
+    var row=rows[j],dt=pdate(row[cd]),amt=absn(row[ca]);if(!dt||!amt)continue;
+    var raw=cc>-1?String(row[cc]).trim().toLowerCase():'',cat=CATS.filter(function(c){return c.toLowerCase()===raw})[0]||'';
+    var note=cn>-1?String(row[cn]).replace(/ +/g,' ').trim():'',md=cm>-1?String(row[cm]).trim().toLowerCase():'';
+    var mode=['UPI','Card','Cash','Bank transfer'].filter(function(m){return m.toLowerCase()===md})[0]||'';
+    out.push({dt:dt,desc:note||cat||'Expense',amt:amt,cat:cat,mode:mode});
+  }
+  return {rows:out,credits:0};
+}
 function imsg(t,bad){var m=$('im-msg');m.textContent=t;m.className='note'+(bad?' neg':'')}
 function renderStage(){
   var flt=$('im-flt').value,need=0,on=0,tot=0;
@@ -417,7 +448,7 @@ function renderStage(){
     var nd=(r.q==='low'||r.q==='ai')&&!r.touched;if(nd)need++;if(r.on&&r.c!=='Skip'){on++;tot+=r.amt}
     if(flt==='need'&&!nd)return '';
     var b=r.dup?['Possible duplicate','over']:r.q==='learned'?['Learned','ok']:r.q==='ai'&&!r.touched?['Claude suggests','over']:nd?['Check','over']:['Auto','ok'];
-    return `<tr><td><input type='checkbox' data-c='${i}' ${r.on?'checked':''} aria-label='Include row'></td><td>${r.dt.split('-').reverse().join('/')}</td><td style='text-align:left;white-space:normal;min-width:180px'>${esc(r.desc)}${r.why?`<br><small style='color:var(--muted)'>${esc(r.why)}</small>`:''}</td><td>${inr(r.amt)}</td><td><select data-s='${i}'>${CATS.concat(['Skip']).map(function(c){return `<option ${c===r.c?'selected':''}>${c}</option>`}).join('')}</select></td><td class='${b[1]}'>${b[0]}</td></tr>`}).join('');
+    return `<tr><td><input type='checkbox' data-c='${i}' ${r.on?'checked':''} aria-label='Include row'></td><td>${r.dt.split('-').reverse().join('/')}</td><td style='text-align:left;white-space:normal;min-width:180px'>${esc(r.desc)}${r.why?`<br><small style='color:var(--muted)'>${esc(r.why)}</small>`:''}</td><td>${inr(r.amt)}</td><td><select data-s='${i}'>${catOpts(r.c,1)}</select></td><td class='${b[1]}'>${b[0]}</td></tr>`}).join('');
   $('im-sum').innerHTML=`<b>${ST.length}</b> rows · <b class='${need?'over':'ok'}'>${need}</b> to check · <b>${on}</b> selected, ${inr(tot)}`;
   $('im-rows').innerHTML=rows||"<tr><td colspan='6'>Nothing to show here.</td></tr>";
   $('im-add').disabled=!on;
@@ -428,11 +459,11 @@ $('im-file').addEventListener('change',function(){
   var rd=new FileReader();
   rd.onload=function(){try{
     var wb=XLSX.read(rd.result,{type:'array',cellDates:true,raw:true}),res=null,src=$('im-src').value;
-    for(var s=0;s<wb.SheetNames.length&&!res;s++){res=parseStmt(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[s]],{header:1,raw:true,defval:''}),src);if(res&&!res.rows.length)res=null}
+    for(var s=0;s<wb.SheetNames.length&&!res;s++){res=(src==='sheet'?parseSheet:parseStmt)(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[s]],{header:1,raw:true,defval:''}),src);if(res&&!res.rows.length)res=null}
     if(!res){imsg('No transactions found. The file needs a Date column, a description column and an amount or debit column.',1);return}
     SRC=src;
-    ST=res.rows.map(function(x){var g=guess(x.desc,SRC),dup=S.expenses.some(function(e){return e.date===x.dt&&Math.abs(e.amt-x.amt)<0.5});return {dt:x.dt,desc:x.desc,amt:x.amt,c:g.c,q:g.q,why:g.why||'',dup:dup,touched:false,on:(g.q==='high'||g.q==='learned')&&!dup&&g.c!=='Skip'}});
-    imsg('Read '+ST.length+' debits'+(res.credits?' ('+res.credits+' credits skipped)':'')+'. Review them below.');
+    ST=res.rows.map(function(x){var g=x.cat?{c:x.cat,q:'high'}:guess(x.desc,SRC),dup=S.expenses.some(function(e){return e.date===x.dt&&Math.abs(e.amt-x.amt)<0.5});return {dt:x.dt,desc:x.desc,amt:x.amt,mode:x.mode,c:g.c,q:g.q,why:g.why||'',dup:dup,touched:false,on:(g.q==='high'||g.q==='learned')&&!dup&&g.c!=='Skip'}});
+    imsg('Read '+ST.length+(SRC==='sheet'?' expenses':' debits')+(res.credits?' ('+res.credits+' credits skipped)':'')+'. Review them below.');
     $('im-rev').hidden=false;renderStage();
   }catch(e){imsg('Could not read that file. Use a CSV or Excel statement.',1)}inp.value=''};
   rd.readAsArrayBuffer(f);
@@ -447,7 +478,7 @@ $('im-all').addEventListener('click',function(){ST.forEach(function(r){if((r.q==
 $('im-none').addEventListener('click',function(){ST.forEach(function(r){r.on=false});renderStage()});
 $('im-add').addEventListener('click',function(){
   var cnt=0,last='';
-  ST.forEach(function(r){if(!r.on||r.c==='Skip')return;S.expenses.push({id:Date.now()+Math.random(),date:r.dt,amt:r.amt,cat:r.c,mode:SRC==='card'?'Card':'Bank transfer',note:r.desc.slice(0,80)});cnt++;if(r.dt>last)last=r.dt});
+  ST.forEach(function(r){if(!r.on||r.c==='Skip')return;S.expenses.push({id:Date.now()+Math.random(),date:r.dt,amt:r.amt,cat:r.c,mode:r.mode||(SRC==='card'?'Card':SRC==='sheet'?'UPI':'Bank transfer'),note:r.desc.slice(0,80)});cnt++;if(r.dt>last)last=r.dt});
   ST.forEach(function(r){if(r.touched){var k=mk(r.desc);if(k)S.learn[k]=r.c}});
   ST=[];save();$('im-rev').hidden=true;
   if(last){month=last.slice(0,7);$('month').value=month}
@@ -458,7 +489,8 @@ var CFG=window.PLANNER_CONFIG||{},tok='',texp=0,fid=localStorage.getItem('hp-fid
 var DNAME='shobhit-neha-home-planner.json',API='https://www.googleapis.com/';
 function hydrate(){$('f-inc').value=S.inc||'';CATS.forEach(function(c,i){$('b'+i).value=S.budgets[c]||''});render()}
 function ready(){return tok&&Date.now()<texp-60000}
-function auth(prompt){return new Promise(function(res,rej){tc.callback=function(r){if(r.error){rej(r);return}tok=r.access_token;texp=Date.now()+r.expires_in*1000;localStorage.setItem('hp-sync','1');res()};tc.requestAccessToken({prompt:prompt})})}
+var rj=null;
+function auth(prompt){return new Promise(function(res,rej){rj=rej;tc.callback=function(r){if(r.error){rej(r);return}tok=r.access_token;texp=Date.now()+r.expires_in*1000;localStorage.setItem('hp-sync','1');res()};tc.requestAccessToken({prompt:prompt})})}
 function gf(url,opt){opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+tok},opt.headers||{});return fetch(url,opt).then(function(r){if(!r.ok)throw new Error(r.status);return r})}
 async function create(){
   var b='hp'+Date.now(),meta=JSON.stringify({name:DNAME,mimeType:'application/json'});
@@ -476,7 +508,7 @@ async function pull(){
   if((rem.updated||0)>(S.updated||0)){
     S=Object.assign({inc:0,budgets:{},expenses:[],goals:[],savings:[],term:[],learn:{}},rem);
     try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
-    hydrate();return 'pulled';
+    migrate();hydrate();return 'pulled';
   }
   await push();return 'pushed';
 }
@@ -489,7 +521,7 @@ window.__push=function(){if(!tc||!localStorage.getItem('hp-sync'))return;dirty=t
 if(CFG.googleClientId){
   $('sy-btn').hidden=false;
   var gs=document.createElement('script');gs.src='https://accounts.google.com/gsi/client';
-  gs.onload=function(){tc=google.accounts.oauth2.initTokenClient({client_id:CFG.googleClientId,scope:'https://www.googleapis.com/auth/drive.file',callback:function(){}})};
+  gs.onload=function(){tc=google.accounts.oauth2.initTokenClient({client_id:CFG.googleClientId,scope:'https://www.googleapis.com/auth/drive.file',callback:function(){},error_callback:function(e){if(rj)rj(e)}})};
   document.head.appendChild(gs);
   $('sy-btn').addEventListener('click',async function(){
     if(!tc){xmsg('Google sign-in is still loading. Try again in a moment.',1);return}
@@ -498,7 +530,10 @@ if(CFG.googleClientId){
       if(!ready())await auth(localStorage.getItem('hp-sync')?'':'consent');
       var r=await pull();dirty=false;
       xmsg(r==='pulled'?'Loaded the latest data from Google Drive.':'Synced with Google Drive.');
-    }catch(e){xmsg('Could not connect to Google Drive. Check the setup steps in the README.',1)}
+    }catch(e){
+      var why=e&&e.type==='popup_closed'?'The sign-in window was closed before finishing.':e&&e.type==='popup_failed_to_open'?'The browser blocked the sign-in window. Allow pop-ups for this site and try again.':e&&e.error==='access_denied'?'Access was denied. Add your Google address as a Test user, or approve the permission.':e&&e.error?'Google sign-in error: '+e.error+'. Check the Client ID and the authorised origin.':e&&e.message==='401'?'Google rejected the sign-in token. Tap Sync again.':e&&e.message==='403'?'Google refused the request (403). Turn on the Google Drive API for the project.':e&&e.message==='404'?'The Drive file was not found. Tap Sync again.':e&&e.message?'Drive request failed ('+e.message+').':'Unknown error.';
+      xmsg('Could not connect to Google Drive. '+why,1);console.error('Drive sync',e);
+    }
   });
 }
 
@@ -510,8 +545,8 @@ function normDate(v){v=String(v).trim();var a=v.match(/^(\d{4})-(\d{1,2})-(\d{1,
 function toWb(){
   var U=XLSX.utils,wb=U.book_new();
   U.book_append_sheet(wb,U.aoa_to_sheet([["Item","Amount (₹)"],["Monthly take-home income",S.inc||0]]),"Income");
-  U.book_append_sheet(wb,U.aoa_to_sheet([["Category","Monthly budget (₹)"]].concat(CATS.map(function(c){return [c,S.budgets[c]||0]}))),"Budgets");
-  U.book_append_sheet(wb,U.aoa_to_sheet([["Date","Category","Amount (₹)","Paid with","Note"]].concat(S.expenses.slice().sort(function(a,b){return a.date<b.date?-1:1}).map(function(x){return [x.date,x.cat,x.amt,x.mode,x.note]}))),"Expenses");
+  U.book_append_sheet(wb,U.aoa_to_sheet([["Category","Monthly budget (₹)","Group"]].concat(CATS.map(function(c){return [c,S.budgets[c]||0,GROUP_OF[c]]}))),"Budgets");
+  U.book_append_sheet(wb,U.aoa_to_sheet([["Date","Category","Amount (₹)","Paid with","Note","Group"]].concat(S.expenses.slice().sort(function(a,b){return a.date<b.date?-1:1}).map(function(x){return [x.date,x.cat,x.amt,x.mode,x.note,GROUP_OF[x.cat]||""]}))),"Expenses");
   U.book_append_sheet(wb,U.aoa_to_sheet([["Goal","Target (₹)","Saved so far (₹)","Monthly contribution (₹)"]].concat(S.goals.map(function(g){return [g.name,g.target,g.saved,g.monthly]}))),"Goals");
   U.book_append_sheet(wb,U.aoa_to_sheet([['Name','Monthly amount (₹)','Expected return % a year','Years']].concat(S.savings.map(function(x){return [x.name,x.monthly,x.ret,x.yrs]}))),'Savings');
   U.book_append_sheet(wb,U.aoa_to_sheet([['Person','Sum assured (₹)','Annual premium (₹)','Cover ends (year)']].concat(S.term.map(function(x){return [x.who,x.cover,x.prem,x.ends]}))),'Term insurance');
@@ -534,10 +569,10 @@ $("x-file").addEventListener("change",function(){
       var wb=XLSX.read(r.result,{type:"array"});
       var g=function(nm){var s=wb.Sheets[nm];return s?XLSX.utils.sheet_to_json(s,{header:1,raw:false,defval:""}):[]};
       var inc=g("Income"),ns={inc:inc[1]?num(inc[1][1]):0,budgets:{},expenses:[],goals:[],savings:[],term:[]};
-      g("Budgets").slice(1).forEach(function(r){if(CATS.indexOf(r[0])>-1)ns.budgets[r[0]]=num(r[1])});
+      g("Budgets").slice(1).forEach(function(r){{var kk=CATS.indexOf(r[0])>-1?r[0]:MIG[r[0]];if(kk)ns.budgets[kk]=(ns.budgets[kk]||0)+num(r[1])}});
       g("Expenses").slice(1).forEach(function(r){
         var dt=normDate(r[0]),amt=num(r[2]);if(!dt||!amt)return;
-        ns.expenses.push({id:Date.now()+Math.random(),date:dt,amt:amt,cat:CATS.indexOf(r[1])>-1?r[1]:"Others",mode:String(r[3]||"UPI"),note:String(r[4]||"").slice(0,80)});
+        ns.expenses.push({id:Date.now()+Math.random(),date:dt,amt:amt,cat:CATS.indexOf(r[1])>-1?r[1]:(MIG[r[1]]||"Others"),mode:String(r[3]||"UPI"),note:String(r[4]||"").slice(0,80)});
       });
       g("Goals").slice(1).forEach(function(r){var t=num(r[2-1]);if(r[0]&&t)ns.goals.push({id:Date.now()+Math.random(),name:String(r[0]).slice(0,50),target:t,saved:num(r[2]),monthly:num(r[3])})});
       g('Savings').slice(1).forEach(function(r){var m=num(r[1]);if(r[0]&&m)ns.savings.push({id:Date.now()+Math.random(),name:String(r[0]).slice(0,50),monthly:m,ret:num(r[2]),yrs:num(r[3])})});
