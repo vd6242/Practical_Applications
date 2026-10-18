@@ -1,5 +1,5 @@
 // Network first, cache fallback: updates arrive when online, the app still opens offline.
-const V = 'home-planner-v6';
+const V = 'home-planner-v7';
 const FILES = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'vendor/xlsx.full.min.js', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))).then(() => self.skipWaiting()));
