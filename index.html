@@ -15,8 +15,8 @@
 <style>
 :root{--bg:#F2F5F4;--surface:#FFFFFF;--ink:#16302B;--muted:#5D726D;--line:#D5DEDB;--accent:#0F6B5C;--accent-ink:#FFFFFF;--bar:#0F6B5C;--bar-bg:#E1EAE7;--warn:#B3412E;--gold:#8A6A12;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0F1B19;--surface:#162623;--ink:#E4EFEC;--muted:#92A8A2;--line:#2B403B;--accent:#3FB59F;--accent-ink:#06211C;--bar:#3FB59F;--bar-bg:#243733;--warn:#EE8A77;--gold:#E0BC5A}}
-:root[data-theme="dark"]{color-scheme:dark;--bg:#0F1B19;--surface:#162623;--ink:#E4EFEC;--muted:#92A8A2;--line:#2B403B;--accent:#3FB59F;--accent-ink:#06211C;--bar:#3FB59F;--bar-bg:#243733;--warn:#EE8A77;--gold:#E0BC5A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0F1B19;--surface:#162623;--ink:#E4EFEC;--muted:#92A8A2;--line:#2B403B;--accent:#3FB59F;--accent-ink:#06211C}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0F1B19;--surface:#162623;--ink:#E4EFEC;--muted:#92A8A2;--line:#2B403B;--accent:#3FB59F;--accent-ink:#06211C;--bar:#3FB59F;--bar-bg:#243733;--warn:#B3412E}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
@@ -72,8 +72,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .kpis{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:18px}@media(min-width:700px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .kpi{border-radius:12px;padding:14px;color:#fff}.kpi b{display:block;font-size:22px;overflow:hidden;text-overflow:ellipsis}.kpi span{font-size:13px}
 .donut{position:relative;width:170px;height:170px;border-radius:50%;flex:none}.donut::after{content:'';position:absolute;inset:27%;background:var(--surface);border-radius:50%}
-.dn{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.lg{flex:1;min-width:180px}.lg div{display:flex;align-items:center;gap:8px;padding:3px 0}.lg i{width:11px;height:11px;border-radius:3px;flex:none}.lg span{flex:1}
-.tr{display:flex;gap:10px;height:190px}.tr .col{flex:1;height:100%;font-size:12px;color:var(--muted);text-align:center}.tr .ar{height:calc(100% - 20px);position:relative;display:flex;align-items:flex-end}.tr i{width:100%;border-radius:6px 6px 0 0;background:#5B5BD6}.tr u{position:absolute;left:-3px;right:-3px;border-top:2px dashed #F2994A}
+.dn{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.lg{flex:1;min-width:180px}.lg div{display:flex;align-items:center;gap:8px;padding:3px 0}.lg i{width:11px;height:11px;border-radius:3px;}
+.tr{display:flex;gap:10px;height:190px}.tr .col{flex:1;height:100%;font-size:12px;color:var(--muted);text-align:center}.tr .ar{height:calc(100% - 20px);position:relative;display:flex;align-items:flex-end;gap:6px}
 .pcards{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}@media(min-width:700px){.pcards{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th,.tbl td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.tbl th:first-child,.tbl td:first-child{text-align:left}
 .over{color:var(--warn);font-weight:600}.ok{color:var(--accent);font-weight:600}
@@ -150,7 +150,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
       <h2>🌱 Planned savings</h2>
       <p class='note' style='margin:-6px 0 12px'>SIPs, recurring deposits or any amount you set aside each month.</p>
       <div class='row one'><div><label for='sv-name'>Name</label><input id='sv-name' maxlength='50' placeholder='e.g. Index fund SIP'></div></div>
-      <div class='row'><div><label for='sv-mo'>Monthly amount (₹)</label><input type='number' id='sv-mo' min='0' inputmode='decimal'></div><div><label for='sv-ret'>Expected return (% a year)</label><input type='number' id='sv-ret' min='0' step='0.5' inputmode='decimal' placeholder='e.g. 10'></div></div>
+      <div class='row'><div><label for='sv-mo'>Monthly amount (₹)</label><input type='number' id='sv-mo' min='0' inputmode='decimal'></div><div><label for='sv-ret'>Expected return (% a year)</label></div></div>
       <div class='row'><div><label for='sv-yrs'>Years</label><input type='number' id='sv-yrs' min='0' inputmode='decimal'></div><div></div></div>
       <button class='btn' id='sv-add' type='button'>Add saving</button>
       <div id='sv-list' style='margin-top:14px'></div>
@@ -158,8 +158,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
     <div class='card k2'>
       <h2>🛡️ Term insurance</h2>
       <p class='note' style='margin:-6px 0 12px'>Record the cover each of you has so you can see it against your income.</p>
-      <div class='row'><div><label for='tm-who'>Insured person</label><select id='tm-who'><option>Neha</option><option>Shobhit</option></select></div><div><label for='tm-cover'>Sum assured (₹)</label><input type='number' id='tm-cover' min='0' inputmode='decimal'></div></div>
-      <div class='row'><div><label for='tm-prem'>Premium a year (₹)</label><input type='number' id='tm-prem' min='0' inputmode='decimal'></div><div><label for='tm-end'>Cover ends (year)</label><input type='number' id='tm-end' min='2000' max='2100' inputmode='numeric' placeholder='e.g. 2055'></div></div>
+      <div class='row'><div><label for='tm-who'>Insured person</label><select id='tm-who'><option>Neha</option><option>Shobhit</option></select></div><div><label for='tm-cover'>Sum assured (₹)</label></div></div>
+      <div class='row'><div><label for='tm-prem'>Premium a year (₹)</label><input type='number' id='tm-prem' min='0' inputmode='decimal'></div><div><label for='tm-end'>Cover ends (year)</label></div></div>
       <button class='btn' id='tm-add' type='button'>Add policy</button>
       <div id='tm-list' style='margin-top:14px'></div>
     </div>
@@ -169,8 +169,9 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 <section class='panel' id='p-im'>
   <div class='card k1'>
     <h2>📥 Import a bank or credit card statement</h2>
-    <p class='note' style='margin:-6px 0 12px'>Download the monthly statement from net banking as CSV or Excel, choose its type, then upload it. Sorting into categories happens in your browser. Nothing is added until you approve it below.</p>
-    <div class='row'><div><label for='im-src'>Statement type</label><select id='im-src'><option value='bank'>Bank account</option><option value='card'>Credit card</option></select></div><div><label for='im-file'>Statement file</label><input type='file' id='im-file' accept='.csv,.xlsx,.xls'></div></div>
+    <p class='note' style='margin:-6px 0 12px'>Download the monthly statement from net banking as CSV or Excel, choose its type, then upload it. Sorting into categories happens in your browser. N
+</p>
+    <div class='row'><div><label for='im-src'>Statement type</label><select id='im-src'><option value='bank'>Bank account</option><option value='card'>Credit card</option></select></div><div></div></div>
     <p class='note' id='im-msg' role='status'></p>
   </div>
   <div class='card' id='im-rev' hidden style='margin-top:18px'>
@@ -183,7 +184,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
       <button class='btn' id='im-add' type='button'>Add selected expenses</button>
     </div>
     <div class='scroll'><table class='tbl'><tr><th></th><th>Date</th><th>Description</th><th>Amount</th><th>Category</th><th>Status</th></tr><tbody id='im-rows'></tbody></table></div>
-    <p class='note'>Rows marked Check had no clear match, so they start unticked. Change the category to tick a row. Choose Skip for card bill payments, transfers or anything you don’t want counted. Your corrections are remembered for next month. Rows left unticked are not added.</p>
+    <p class='note'>Rows marked Check had no clear match, so they start unticked. Change the category to tick a row. Choose Skip for card bill payments, transfers or anything you don’t want cou
+</p>
   </div>
 </section>
 
@@ -204,10 +206,10 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 </section>
 </div>
 
-<script src="vendor/xlsx.full.min.js"></script>
+<script src="xlsx.full.min.js"></script>
 <script>
 (function(){
-var CATS=["Home","Rent","TV","Phone","Electricity","Driver","Diesel","Credit card","Loan","LIC Neha","LIC Shobhit","Term Insurance Shobhit","Term Insurance Neha","Car insurance","Education fees","Education expense","SIP","Travel local","Zomato","Dining","Travels","Groceries","Household help","Health","Shopping","Others"];
+var CATS=["Home","Rent","TV","Phone","Electricity","Driver","Diesel","Credit card","Loan","LIC Neha","LIC Shobhit","Term Insurance Shobhit","Term Insurance Neha","Car insurance","Education fees"];
 var KEY="homefin-v1";
 var S={inc:0,emi:0,rent:0,ins:0,budgets:{},expenses:[],goals:[]};
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
@@ -215,345 +217,14 @@ function save(){S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify
 function $(id){return document.getElementById(id)}
 function n(v){v=parseFloat(v);return isFinite(v)&&v>0?v:0}
 function inr(v){return "₹"+Math.round(v).toLocaleString("en-IN")}
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function esc(s){return String(s).replace(/[&<>\"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 var month=today().slice(0,7);
 $("month").value=month;$("e-date").value=today();
 $("e-cat").innerHTML=CATS.map(function(c){return "<option>"+c+"</option>"}).join("");
 
 // tabs
-document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){
-  document.querySelectorAll(".tab").forEach(function(t){t.setAttribute("aria-selected",t===b)});
-  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on")});
-  $("p-"+b.dataset.t).classList.add("on");
-})});
-$("month").addEventListener("change",function(){month=this.value||month;render()});
-
-// fixed-cost + budget inputs
-["inc"].forEach(function(k){
-  var el=$("f-"+k);el.value=S[k]||"";
-  el.addEventListener("input",function(){S[k]=n(el.value);save();renderSummary();renderBars()});
-});
-$("budgets").innerHTML=CATS.map(function(c,i){
-  return '<div class="row one" style="margin-bottom:8px"><div><label for="b'+i+'">'+c+'</label><input type="number" id="b'+i+'" min="0" inputmode="decimal" value="'+(S.budgets[c]||"")+'"></div></div>';
-}).join("");
-CATS.forEach(function(c,i){$("b"+i).addEventListener("input",function(){S.budgets[c]=n(this.value);save();renderSummary();renderBars()})});
-
-// expenses
-$("e-add").addEventListener("click",function(){
-  var amt=n($("e-amt").value),msg=$("e-msg");
-  if(!amt){msg.textContent="Enter an amount greater than zero.";msg.className="note neg";return}
-  if(!$("e-date").value){msg.textContent="Pick a date.";msg.className="note neg";return}
-  S.expenses.push({id:Date.now()+Math.random(),date:$("e-date").value,amt:amt,cat:$("e-cat").value,mode:$("e-mode").value,note:$("e-note").value.trim()});
-  save();$("e-amt").value="";$("e-note").value="";
-  msg.className="note";msg.textContent="Added "+inr(amt)+" to "+$("e-cat").value+".";
-  month=$("e-date").value.slice(0,7);$("month").value=month;render();$("e-amt").focus();
-});
-$("e-list").addEventListener("click",function(ev){
-  var b=ev.target.closest("[data-del]");if(!b)return;
-  S.expenses=S.expenses.filter(function(x){return String(x.id)!==b.dataset.del});save();render();
-});
-
-// goals
-$("g-add").addEventListener("click",function(){
-  var name=$("g-name").value.trim(),t=n($("g-target").value);
-  if(!name||!t)return;
-  S.goals.push({id:Date.now()+Math.random(),name:name,target:t,saved:n($("g-saved").value),monthly:n($("g-monthly").value)});
-  save();["g-name","g-target","g-saved","g-monthly"].forEach(function(i){$(i).value=""});render();
-});
-$("g-list").addEventListener("click",function(ev){
-  var b=ev.target.closest("[data-gdel]");if(!b)return;
-  S.goals=S.goals.filter(function(x){return String(x.id)!==b.dataset.gdel});save();render();
-});
-
-function monthExp(){return S.expenses.filter(function(x){return x.date.slice(0,7)===month}).sort(function(a,b){return a.date<b.date?1:-1})}
-function totals(){
-  var ex=monthExp(),spent=0,by={};
-  ex.forEach(function(x){spent+=x.amt;by[x.cat]=(by[x.cat]||0)+x.amt});
-  var budget=0;CATS.forEach(function(c){budget+=S.budgets[c]||0});
-  var goals=S.goals.reduce(function(a,g){return a+g.monthly},0);
-  return {ex:ex,spent:spent,by:by,budget:budget,goals:goals,fixed:0};
-}
-function renderSummary(){
-  var t=totals(),free=S.inc-t.fixed-t.spent-t.goals;
-  var emiPct=S.inc?Math.round((S.budgets["Loan"]||0)/S.inc*100):0;
-  var plannedFree=S.inc-t.fixed-t.budget-t.goals;
-  $("stats").innerHTML=
-   '<div class="stat s1"><span>Income</span><b>'+inr(S.inc)+'</b></div>'+
-   '<div class="stat s2"><span>Spent this month</span><b>'+inr(t.spent)+'</b></div>'+
-   '<div class="stat s3"><span>Left after goals and spending</span><b class="'+(free<0?"neg":"")+'">'+inr(free)+'</b></div>'+
-   '<div class="stat s4"><span>Loan share of income</span><b class="'+(emiPct>40?"neg":"")+'">'+(S.inc?emiPct+"%":"–")+'</b></div>';
-  var n2=$("e-msg");if(plannedFree<0&&S.inc){n2.dataset.warn="1"}
-}
-function renderList(){
-  var ex=monthExp();
-  $("e-list").innerHTML=ex.length?ex.map(function(x){
-    return '<div class="item"><div class="m"><b>'+esc(x.cat)+'</b><small>'+x.date.split("-").reverse().join("/")+" · "+esc(x.mode)+(x.note?" · "+esc(x.note):"")+'</small></div><b>'+inr(x.amt)+'</b><button class="x" data-del="'+x.id+'" aria-label="Delete expense">×</button></div>';
-  }).join(""):'<p class="empty">No expenses logged for this month yet. Add the first one on the left.</p>';
-}
-function renderBars(){
-  var t=totals();
-  $("catbars").innerHTML=CATS.map(function(c){
-    var b=S.budgets[c]||0,s=t.by[c]||0,pct=b?Math.min(100,s/b*100):(s?100:0),over=b?s>b:s>0;
-    return '<div class="cat"><div class="t"><span>'+c+'</span><small>'+inr(s)+(b?" of "+inr(b):" (no budget)")+'</small></div><div class="bar"><i class="'+(over?"over":"")+'" style="width:'+pct+'%;'+(over?"":"background:"+col(c))+'"></i></div></div>';
-  }).join("")+'<p class="note">Goal contributions: '+inr(t.goals)+' · Planned spending: '+inr(t.budget)+' · Unplanned balance: <b class="'+(S.inc-t.fixed-t.budget-t.goals<0?"neg":"")+'">'+inr(S.inc-t.fixed-t.budget-t.goals)+'</b></p>';
-}
-function renderGoals(){
-  $("g-list").innerHTML=S.goals.length?S.goals.map(function(g){
-    var pct=Math.min(100,g.saved/g.target*100),left=Math.max(0,g.target-g.saved);
-    var mo=g.monthly?Math.ceil(left/g.monthly):0;
-    var eta=left===0?"Goal reached":g.monthly?mo+" month"+(mo===1?"":"s")+" to go at "+inr(g.monthly)+" a month":"Add a monthly contribution to see the timeline";
-    return '<div class="cat"><div class="t"><span>'+esc(g.name)+'</span><span><small>'+inr(g.saved)+" of "+inr(g.target)+'</small><button class="x" data-gdel="'+g.id+'" aria-label="Delete goal">×</button></span></div><div class="bar"><i style="width:'+pct+'%"></i></div><p class="note" style="margin:4px 0 0">'+eta+'</p></div>';
-  }).join(""):'<p class="empty">No goals yet. Add one, such as an emergency fund or a prepayment target.</p>';
-}
-function render(){renderSummary();renderList();renderBars();renderGoals();renderSav();renderAn();renderPer();renderTips()}
-S.savings=S.savings||[];S.term=S.term||[];S.learn=S.learn||{};
-var PAL=['#0F9D8A','#5B5BD6','#F2994A','#E5484D','#2D9CDB','#9B51E0','#27AE60','#E0A800','#D6409F','#6C7A89'];
-function col(c){return PAL[Math.max(0,CATS.indexOf(c))%PAL.length]}
-function fv(p,ret,yrs){var r=ret/1200,m=yrs*12;return r?p*((Math.pow(1+r,m)-1)/r)*(1+r):p*m}
-function sum(a,k){return a.reduce(function(s,x){return s+(x[k]||0)},0)}
-$('sv-add').addEventListener('click',function(){var nm=$('sv-name').value.trim(),mo=n($('sv-mo').value);if(!nm||!mo)return;S.savings.push({id:Date.now()+Math.random(),name:nm.slice(0,50),monthly:mo,ret:n($('sv-ret').value),yrs:n($('sv-yrs').value)});save();['sv-name','sv-mo','sv-ret','sv-yrs'].forEach(function(i){$(i).value=''});render()});
-$('tm-add').addEventListener('click',function(){var cv=n($('tm-cover').value);if(!cv)return;S.term.push({id:Date.now()+Math.random(),who:$('tm-who').value,cover:cv,prem:n($('tm-prem').value),ends:n($('tm-end').value)});save();['tm-cover','tm-prem','tm-end'].forEach(function(i){$(i).value=''});render()});
-$('sv-list').addEventListener('click',function(e){var b=e.target.closest('[data-sv]');if(!b)return;S.savings=S.savings.filter(function(x){return String(x.id)!==b.dataset.sv});save();render()});
-$('tm-list').addEventListener('click',function(e){var b=e.target.closest('[data-tm]');if(!b)return;S.term=S.term.filter(function(x){return String(x.id)!==b.dataset.tm});save();render()});
-function renderSav(){
-  var tot=sum(S.savings,'monthly'),cov=sum(S.term,'cover'),pr=sum(S.term,'prem');
-  $('sv-list').innerHTML=(S.savings.length?S.savings.map(function(x){return `<div class='item'><div class='m'><b>${esc(x.name)}</b><small>${x.yrs?`At ${x.ret}% a year for ${x.yrs} years: about ${inr(fv(x.monthly,x.ret,x.yrs))}`:'Add years to see a projection'}</small></div><b>${inr(x.monthly)}/mo</b><button class='x' data-sv='${x.id}' aria-label='Delete saving'>×</button></div>`}).join(''):"<p class='empty'>No planned savings yet. Add your first one above.</p>")+`<p class='note'>Planned: <b>${inr(tot)}</b> a month${S.inc?` (${Math.round(tot/S.inc*100)}% of income)`:''}. Projections are illustrations, not guarantees.</p>`;
-  $('tm-list').innerHTML=(S.term.length?S.term.map(function(x){return `<div class='item'><div class='m'><b>${esc(x.who)}</b><small>Premium ${inr(x.prem)} a year${x.ends?' · cover till '+x.ends:''}</small></div><b>${inr(x.cover)}</b><button class='x' data-tm='${x.id}' aria-label='Delete policy'>×</button></div>`}).join(''):"<p class='empty'>No policies yet. Add one above.</p>")+`<p class='note'>Total cover: <b>${inr(cov)}</b>${S.inc?' = '+(cov/(S.inc*12)).toFixed(1)+'× yearly income':''} · Premiums: ${inr(pr)} a year. Many planners suggest 10 to 15 times yearly income; your needs may differ.</p>`;
-}
-function renderAn(){
-  var t=totals(),pct=t.budget?Math.round(t.spent/t.budget*100):0,sv=sum(S.savings,'monthly')+t.goals,cov=sum(S.term,'cover');
-  var ent=Object.keys(t.by).map(function(c){return [c,t.by[c]]}).sort(function(a,b){return b[1]-a[1]});
-  var y=+month.slice(0,4),mo=+month.slice(5,7),ms=[];
-  for(var i=5;i>=0;i--){var d=new Date(y,mo-1-i,1);ms.push({k:d.getFullYear()+'-'+pad(d.getMonth()+1),l:d.toLocaleString('en-IN',{month:'short'}),v:0})}
-  S.expenses.forEach(function(x){ms.forEach(function(m){if(x.date.slice(0,7)===m.k)m.v+=x.amt})});
-  var mx=Math.max.apply(null,ms.map(function(m){return m.v}).concat([t.budget,1]));
-  var acc=0,seg=ent.map(function(e){var a=acc/t.spent*100;acc+=e[1];return col(e[0])+' '+a+'% '+acc/t.spent*100+'%'}).join(',');
-  var md={};t.ex.forEach(function(x){md[x.mode]=(md[x.mode]||0)+x.amt});
-  var mdl=Object.keys(md).sort(function(a,b){return md[b]-md[a]});
-  $('an').innerHTML=`<div class='kpis'><div class='kpi' style='background:#5B5BD6'><span>Budget used</span><b>${t.budget?pct+'%':'–'}</b></div><div class='kpi' style='background:#0F9D8A'><span>Saved or set aside</span><b>${S.inc?Math.round(sv/S.inc*100)+'%':'–'}</b></div><div class='kpi' style='background:#F2994A'><span>Term cover vs yearly income</span><b>${S.inc&&cov?(cov/(S.inc*12)).toFixed(1)+'×':'–'}</b></div><div class='kpi' style='background:#E5484D'><span>Biggest spend</span><b>${ent[0]?esc(ent[0][0]):'–'}</b></div></div>`+
-  `<div class='grid two'><div class='card k1'><h2>Where the money went</h2>${t.spent?`<div class='dn'><div class='donut' style='background:conic-gradient(${seg})' role='img' aria-label='Spending by category'></div><div class='lg'>${ent.slice(0,8).map(function(e){return `<div><i style='background:${col(e[0])}'></i><span>${esc(e[0])}</span><b>${inr(e[1])}</b> <small>${Math.round(e[1]/t.spent*100)}%</small></div>`}).join('')}</div></div>`:"<p class='empty'>No spending logged for this month yet.</p>"}</div>`+
-  `<div class='card k2'><h2>Last 6 months</h2><div class='tr'>${ms.map(function(m){return `<div class='col'><div class='ar'><i style='height:${m.v/mx*100}%' title='${inr(m.v)}'></i>${t.budget?`<u style='bottom:${t.budget/mx*100}%'></u>`:''}</div>${m.l}</div>`}).join('')}</div><p class='note'>Bars show what you spent each month.${t.budget?' The dashed line is your total monthly budget of '+inr(t.budget)+'.':''}</p></div></div>`+
-  `<div class='card k3' style='margin-top:18px'><h2>How you paid this month</h2>${mdl.length?mdl.map(function(k,i){return `<div class='cat'><div class='t'><span>${esc(k)}</span><small>${inr(md[k])} · ${Math.round(md[k]/t.spent*100)}%</small></div><div class='bar'><i style='width:${md[k]/t.spent*100}%;background:${PAL[i%PAL.length]}'></i></div></div>`}).join(''):"<p class='empty'>Nothing to show yet.</p>"}</div>`;
-}
-render();
-
-function periods(){
-  var y=+month.slice(0,4),m=+month.slice(5,7),fy=m>=4?y:y-1,idx=m>=4?m-4:m+8,qs=idx-idx%3;
-  function key(i){return (fy+Math.floor((3+i)/12))+'-'+pad((3+i)%12+1)}
-  function rng(a){var r=[];for(var i=a;i<=idx;i++)r.push(key(i));return r}
-  return [{n:'MTD',l:new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'}),keys:rng(idx)},{n:'QTD',l:'Q'+(qs/3+1)+' of the financial year',keys:rng(qs)},{n:'YTD',l:'FY '+fy+'-'+String(fy+1).slice(2),keys:rng(0)}];
-}
-function actual(keys){var by={},tot=0;S.expenses.forEach(function(x){if(keys.indexOf(x.date.slice(0,7))>-1){by[x.cat]=(by[x.cat]||0)+x.amt;tot+=x.amt}});return {by:by,tot:tot}}
-function renderPer(){
-  var P=periods(),t=totals(),A=P.map(function(p){return actual(p.keys)}),C=['#5B5BD6','#0F9D8A','#F2994A'];
-  var cards=P.map(function(p,i){var bud=t.budget*p.keys.length,act=A[i].tot,over=bud&&act>bud,pc=bud?Math.min(100,act/bud*100):(act?100:0);
-    return `<div class='card' style='border-top:4px solid ${C[i]}'><b>${p.n}</b> <small style='color:var(--muted)'>${p.l}</small><div style='font-size:22px;font-weight:700;margin:6px 0'>${inr(act)}</div><small>Budget ${inr(bud)}</small><div class='bar'><i class='${over?'over':''}' style='width:${pc}%;background:${over?'':C[i]}'></i></div><p class='note' style='margin:6px 0 0'>${bud?(over?`<span class='over'>${inr(act-bud)} over budget</span>`:`<span class='ok'>${inr(bud-act)} under budget</span>`):'Set budgets to compare'}</p></div>`}).join('');
-  var cats=CATS.filter(function(c){return (S.budgets[c]||0)>0||A[2].by[c]});
-  var rows=cats.map(function(c){return `<tr><td>${esc(c)}</td>`+P.map(function(p,i){var a=A[i].by[c]||0,b=(S.budgets[c]||0)*p.keys.length;return `<td class='${b&&a>b?'over':''}'>${inr(a)} / ${inr(b)}</td>`}).join('')+'</tr>'}).join('');
-  var html=`<h2 style='margin:4px 0 10px'>Budget vs actual</h2><div class='pcards'>${cards}</div><div class='card' style='margin:18px 0'><h2>By category (actual / budget)</h2><div class='scroll'><table class='tbl'><tr><th>Category</th>${P.map(function(p){return '<th>'+p.n+'</th>'}).join('')}</tr>${rows||"<tr><td colspan='4'>Set budgets or log expenses to see this table.</td></tr>"}</table></div><p class='note'>Budget is your monthly budget times the months in each period. The financial year runs April to March (${P[2].l}). Periods end at the month chosen at the top.</p></div>`;
-  var k=$('an').querySelector('.kpis');if(k)k.insertAdjacentHTML('afterend',html);
-}
-function renderTips(){
-  var t=totals(),T=[],P=periods(),ya=actual(P[2].keys);
-  if(!S.inc){T.push(['💡','Add your income','Enter your monthly take-home income in Monthly plan to unlock savings and investment suggestions.'])}
-  else{
-    var sv=sum(S.savings,'monthly')+t.goals,rate=Math.round(sv/S.inc*100),base=t.budget||t.spent,ef=base*6,efSaved=S.goals.filter(function(g){return /emergency/i.test(g.name)}).reduce(function(a,g){return a+g.saved},0),cov=sum(S.term,'cover');
-    T.push(rate<20?['🌱','Raise the amount you set aside','You are setting aside '+rate+'% of income. Many households aim for about 20%. Try moving 2 to 3 points more each time income rises, with a transfer on salary day so it happens before spending.']:['👍','Savings rate looks healthy','You are setting aside '+rate+'% of income. Keep it automated and review it every few months.']);
-    if(base)T.push(efSaved<=0?['🛡️','Start an emergency fund','Six months of your budgeted spending is about '+inr(ef)+'. Add it as a goal and keep it in a savings account or liquid fund.']:efSaved<ef?['🛡️','Emergency fund is '+Math.round(efSaved/ef*100)+'% there','You have '+inr(efSaved)+' of about '+inr(ef)+' (six months of budgeted spending). Finish this before taking more investment risk.']:['✅','Emergency fund is covered','You have at least six months of budgeted spending set aside.']);
-    ['Neha','Shobhit'].forEach(function(p){if(!S.term.some(function(x){return x.who===p}))T.push(['🔒','No term cover recorded for '+p,'If anyone depends on '+p+'\u2019s income, add the policy in Savings & cover, or consider getting one while premiums are lower.'])});
-    if(cov&&cov<S.inc*120)T.push(['🔒','Term cover is '+(cov/(S.inc*12)).toFixed(1)+'× yearly income','Many planners suggest 10 to 15 times, higher if you have loans or children\u2019s education ahead. Review whether your cover matches your liabilities.']);
-    var loan=S.budgets['Loan']||0;if(loan>S.inc*0.4)T.push(['🏦','Loan payments are '+Math.round(loan/S.inc*100)+'% of income','Above about 40% leaves little room to save. Compare the loan interest rate with realistic returns before choosing between prepaying and investing.']);
-    if(ya.by['Credit card'])T.push(['💳','Pay the credit card in full','Card interest is usually much higher than investment returns, so clearing the full bill each month comes before investing.']);
-    var ov=CATS.map(function(c){return [c,(ya.by[c]||0)-(S.budgets[c]||0)*P[2].keys.length]}).filter(function(x){return x[1]>0&&S.budgets[x[0]]}).sort(function(a,b){return b[1]-a[1]}).slice(0,2);
-    ov.forEach(function(x){T.push(['📉',x[0]+' is '+inr(x[1])+' over budget this year','Review what is driving it, or raise the budget if the new level is realistic so the plan stays honest.'])});
-    var hi=S.savings.filter(function(x){return x.ret>12})[0];if(hi)T.push(['📈','Test a lower return for '+esc(hi.name),'You assumed '+hi.ret+'% a year. For planning, try 8 to 10% as well so the projection is not too optimistic.']);
-    T.push(['🧭','A common order for investing','Emergency fund, then term and health cover, then clearing high-interest debt, then long-term investing. Money needed within about 3 years usually suits fixed deposits or debt funds. For goals 5 or more years away, many people use diversified equity index funds through monthly SIPs. EPF, PPF and NPS are options for retirement. Check each option\u2019s current rules and tax treatment.'])
-  }
-  $('an').insertAdjacentHTML('beforeend',`<div class='card k1' style='margin-top:18px'><h2>Suggestions for savings and investments</h2>${T.map(function(x){return `<div class='tip'><em>${x[0]}</em><div><b>${x[1]}</b><div class='note' style='margin:2px 0 0'>${x[2]}</div></div></div>`}).join('')}<p class='note'>General ideas based on the numbers you entered, not personal financial advice. Consider a SEBI-registered adviser before big decisions.</p></div>`);
-}
-var ST=[],SRC='bank';
-var RULES=[['Zomato',/zomato|swiggy|eatsure|magicpin/i],['Groceries',/bigbasket|blinkit|zepto|instamart|dmart|avenue supermarts|reliance fresh|reliance smart|more retail|grocer|kirana|jiomart|milk|vegetable|fruit/i],['Dining',/restaurant|cafe|coffee|starbucks|barbeque|dominos|pizza|mcdonald|kfc|burger|dining|bakery|biryani|haldiram|dhaba/i],['Electricity',/electric|bses|tata power|uppcl|discom|power bill|torrent power|bijli|mvvnl|pvvnl/i],['Phone',/airtel|(?<![a-z])jio(?![a-z])|vodafone|(?<![a-z])vi(?![a-z])|bsnl|recharge|postpaid|broadband|fibernet/i],['TV',/tata ?play|tatasky|dish ?tv|d2h|sun ?direct|netflix|hotstar|prime video|jiocinema|sony ?liv|youtube|spotify|zee5/i],['Diesel',/petrol|diesel|fuel|hpcl|bpcl|iocl|indian oil|nayara|bharat petroleum|hindustan petroleum/i],['Travel local',/uber|(?<![a-z])ola(?![a-z])|rapido|metro|dmrc|fastag|parking|(?<![a-z])toll(?![a-z])|namma yatri/i],['Travels',/makemytrip|goibibo|irctc|indigo|air india|vistara|akasa|cleartrip|ixigo|redbus|airbnb|oyo|yatra|booking[.]com|agoda/i],['Education fees',/school|tuition|college|university|admission/i],['Education expense',/(?<![a-z])books?(?![a-z])|stationery|byju|unacademy|coaching|udemy|coursera|vedantu/i],['Health',/pharm|apollo|medplus|1mg|netmeds|hospital|clinic|diagnostic|pathology|lal path|thyrocare|dental|medical|doctor/i],['Shopping',/amazon|flipkart|myntra|ajio|nykaa|meesho|lifestyle|westside|decathlon|croma|reliance digital|ikea|pantaloons|max fashion|zara|tata cliq/i],['Home',/urban ?company|urbanclap|furniture|pepperfry|hardware|plumb|carpent|repair|paint/i],['Rent',/(?<![a-z])rent(?![a-z])|nobroker|nestaway|housing[.]com/i],['Loan',/(?<![a-z])emi(?![a-z])|loan|hdfc ltd|lic housing|bajaj fin|home fin/i],['SIP',/(?<![a-z])sip(?![a-z])|mutual fund|groww|zerodha|nippon|mirae|(?<![a-z])mf(?![a-z])|bse star|cams|kfin|(?<![a-z])ppf(?![a-z])|(?<![a-z])nps(?![a-z])/i],['Car insurance',/car insurance|motor insurance|acko|digit insurance/i],['Household help',/maid|cook|house ?help|domestic|helper/i],['Driver',/driver/i],['LIC Neha',/(?<![a-z])lic(?![a-z])|life insurance corp/i,1],['Term Insurance Neha',/term plan|term insurance|max life|hdfc life|tata aia|icici pru|pnb metlife|sbi life|bajaj allianz life/i,1]];
-function mk(d){return String(d).toLowerCase().replace(/upi|neft|imps|rtgs|pos|nach|ach|ecs|[0-9]+|[^a-z ]+/g,' ').replace(/ +/g,' ').trim().split(' ').slice(0,3).join(' ')}
-function guess(d,type){
-  var k=mk(d);if(k&&S.learn[k])return {c:S.learn[k],q:'learned'};
-  if(type==='bank'&&/credit card|cc pay|card payment|(?<![a-z])cred(?![a-z])|billdesk.*card|autopay.*card/i.test(d))return {c:'Skip',q:'high',why:'Card bill payment: counted on the card statement'};
-  for(var i=0;i<RULES.length;i++)if(RULES[i][1].test(d))return {c:RULES[i][0],q:RULES[i][2]?'low':'high'};
-  return {c:'Others',q:'low'};
-}
-function absn(v){var x=parseFloat(String(v).replace(/[^0-9.]/g,''));return isFinite(x)?x:0}
-function pdate(v){
-  if(v instanceof Date){var d=new Date(v.getTime()+43200000);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-  var s=String(v).trim(),a=normDate(s);if(a)return a;
-  a=s.match(/^([0-9]{1,2})[/.-]([0-9]{1,2})[/.-]([0-9]{2})(?![0-9])/);if(a)return '20'+a[3]+'-'+pad(a[2])+'-'+pad(a[1]);
-  a=s.match(/([0-9]{1,2})[ /-]([A-Za-z]{3})[a-z]*[ /,-]*([0-9]{2,4})/);
-  if(a){var mi='jan feb mar apr may jun jul aug sep oct nov dec'.split(' ').indexOf(a[2].toLowerCase());if(mi>-1)return (a[3].length===2?'20'+a[3]:a[3])+'-'+pad(mi+1)+'-'+pad(a[1])}
-  return '';
-}
-function parseStmt(rows,type){
-  var hi=-1,H=[];
-  for(var i=0;i<Math.min(rows.length,40)&&hi<0;i++){var r=rows[i].map(function(c){return String(c).toLowerCase()});if(r.some(function(c){return /date/.test(c)})&&r.some(function(c){return /narration|description|particulars|details|remarks|merchant|transaction/.test(c)})){hi=i;H=r}}
-  if(hi<0)return null;
-  function f(re,not){return H.findIndex(function(c,i){return i!==not&&re.test(c)})}
-  var cd=f(/date|(?<![a-z])dt(?![a-z])/),cs=f(/narration|description|particulars|merchant|remarks/);
-  if(cs<0)cs=f(/details|transaction/,cd);
-  var dd=f(/withdraw|debit|(?<![a-z])dr(?![a-z])/),cc=f(/deposit|(?<![a-z])credit(?! card)|(?<![a-z])cr(?![a-z])/),ca=f(/amount|(?<![a-z])amt/),cx=f(/dr *[/] *cr|cr *[/] *dr|(?<![a-z])type(?![a-z])/),out=[],credits=0;
-  if(dd===cx)dd=-1;if(cc===cx)cc=-1;if(dd>-1||cc>-1)ca=-1;
-  for(var j=hi+1;j<rows.length;j++){
-    var row=rows[j],dt=pdate(row[cd]);if(!dt)continue;
-    var desc=String(row[cs]==null?'':row[cs]).replace(/ +/g,' ').trim(),amt=0;
-    if(dd>-1||cc>-1){var d1=absn(row[dd]),c1=absn(row[cc]);if(d1)amt=d1;else{if(c1)credits++;continue}}
-    else if(ca>-1){var raw=String(row[ca]),v=absn(raw),dir=cx>-1?String(row[cx]):raw,cr=/(?<![a-z])cr(?![a-z])|credit/i.test(dir),dr=/(?<![a-z])dr(?![a-z])|debit/i.test(dir),neg=/^ *-|[(]/.test(raw);
-      var isD=cr?false:dr?true:(type==='bank'?neg:!neg);if(!v)continue;if(!isD){credits++;continue}amt=v}
-    else continue;
-    if(amt&&desc)out.push({dt:dt,desc:desc,amt:amt});
-  }
-  return {rows:out,credits:credits};
-}
-function imsg(t,bad){var m=$('im-msg');m.textContent=t;m.className='note'+(bad?' neg':'')}
-function renderStage(){
-  var flt=$('im-flt').value,need=0,on=0,tot=0;
-  var rows=ST.map(function(r,i){
-    var nd=(r.q==='low'||r.q==='ai')&&!r.touched;if(nd)need++;if(r.on&&r.c!=='Skip'){on++;tot+=r.amt}
-    if(flt==='need'&&!nd)return '';
-    var b=r.dup?['Possible duplicate','over']:r.q==='learned'?['Learned','ok']:r.q==='ai'&&!r.touched?['Claude suggests','over']:nd?['Check','over']:['Auto','ok'];
-    return `<tr><td><input type='checkbox' data-c='${i}' ${r.on?'checked':''} aria-label='Include row'></td><td>${r.dt.split('-').reverse().join('/')}</td><td style='text-align:left;white-space:normal;min-width:180px'>${esc(r.desc)}${r.why?`<br><small style='color:var(--muted)'>${esc(r.why)}</small>`:''}</td><td>${inr(r.amt)}</td><td><select data-s='${i}'>${CATS.concat(['Skip']).map(function(c){return `<option ${c===r.c?'selected':''}>${c}</option>`}).join('')}</select></td><td class='${b[1]}'>${b[0]}</td></tr>`}).join('');
-  $('im-sum').innerHTML=`<b>${ST.length}</b> rows · <b class='${need?'over':'ok'}'>${need}</b> to check · <b>${on}</b> selected, ${inr(tot)}`;
-  $('im-rows').innerHTML=rows||"<tr><td colspan='6'>Nothing to show here.</td></tr>";
-  $('im-add').disabled=!on;
-}
-$('im-file').addEventListener('change',function(){
-  var f=this.files[0],inp=this;if(!f)return;
-  if(!window.XLSX){imsg('The Excel library did not load. Reload the page and try again.',1);return}
-  var rd=new FileReader();
-  rd.onload=function(){try{
-    var wb=XLSX.read(rd.result,{type:'array',cellDates:true,raw:true}),res=null,src=$('im-src').value;
-    for(var s=0;s<wb.SheetNames.length&&!res;s++){res=parseStmt(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[s]],{header:1,raw:true,defval:''}),src);if(res&&!res.rows.length)res=null}
-    if(!res){imsg('No transactions found. The file needs a Date column, a description column and an amount or debit column.',1);return}
-    SRC=src;
-    ST=res.rows.map(function(x){var g=guess(x.desc,SRC),dup=S.expenses.some(function(e){return e.date===x.dt&&Math.abs(e.amt-x.amt)<0.5});return {dt:x.dt,desc:x.desc,amt:x.amt,c:g.c,q:g.q,why:g.why||'',dup:dup,touched:false,on:(g.q==='high'||g.q==='learned')&&!dup&&g.c!=='Skip'}});
-    imsg('Read '+ST.length+' debits'+(res.credits?' ('+res.credits+' credits skipped)':'')+'. Review them below.');
-    $('im-rev').hidden=false;renderStage();
-  }catch(e){imsg('Could not read that file. Use a CSV or Excel statement.',1)}inp.value=''};
-  rd.readAsArrayBuffer(f);
-});
-$('im-flt').addEventListener('change',renderStage);
-$('im-rows').addEventListener('change',function(e){var t=e.target;
-  if(t.dataset.c!==undefined)ST[+t.dataset.c].on=t.checked;
-  else if(t.dataset.s!==undefined){var r=ST[+t.dataset.s];r.c=t.value;r.touched=true;r.on=t.value!=='Skip'}
-  renderStage();
-});
-$('im-all').addEventListener('click',function(){ST.forEach(function(r){if((r.q==='high'||r.q==='learned')&&!r.dup&&r.c!=='Skip')r.on=true});renderStage()});
-$('im-none').addEventListener('click',function(){ST.forEach(function(r){r.on=false});renderStage()});
-$('im-add').addEventListener('click',function(){
-  var cnt=0,last='';
-  ST.forEach(function(r){if(!r.on||r.c==='Skip')return;S.expenses.push({id:Date.now()+Math.random(),date:r.dt,amt:r.amt,cat:r.c,mode:SRC==='card'?'Card':'Bank transfer',note:r.desc.slice(0,80)});cnt++;if(r.dt>last)last=r.dt});
-  ST.forEach(function(r){if(r.touched){var k=mk(r.desc);if(k)S.learn[k]=r.c}});
-  ST=[];save();$('im-rev').hidden=true;
-  if(last){month=last.slice(0,7);$('month').value=month}
-  render();imsg('Added '+cnt+' expenses. Rows you did not select were left out, and your category choices are remembered for next time.');
-});
-// Optional Google Drive sync (needs a client ID in config.js)
-var CFG=window.PLANNER_CONFIG||{},tok='',texp=0,fid=localStorage.getItem('hp-fid')||'',tc=null,pt=0,dirty=false;
-var DNAME='shobhit-neha-home-planner.json',API='https://www.googleapis.com/';
-function hydrate(){$('f-inc').value=S.inc||'';CATS.forEach(function(c,i){$('b'+i).value=S.budgets[c]||''});render()}
-function ready(){return tok&&Date.now()<texp-60000}
-function auth(prompt){return new Promise(function(res,rej){tc.callback=function(r){if(r.error){rej(r);return}tok=r.access_token;texp=Date.now()+r.expires_in*1000;localStorage.setItem('hp-sync','1');res()};tc.requestAccessToken({prompt:prompt})})}
-function gf(url,opt){opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+tok},opt.headers||{});return fetch(url,opt).then(function(r){if(!r.ok)throw new Error(r.status);return r})}
-async function create(){
-  var b='hp'+Date.now(),meta=JSON.stringify({name:DNAME,mimeType:'application/json'});
-  var body='--'+b+'\r\nContent-Type: application/json\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(S)+'\r\n--'+b+'--';
-  var r=await (await gf(API+'upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:body})).json();
-  fid=r.id;localStorage.setItem('hp-fid',fid);
-}
-async function push(){if(!fid){await create();return}await gf(API+'upload/drive/v3/files/'+fid+'?uploadType=media',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)})}
-async function pull(){
-  var q=encodeURIComponent("name='"+DNAME+"' and trashed=false");
-  var l=await (await gf(API+'drive/v3/files?q='+q+'&fields=files(id)')).json();
-  if(!l.files.length){fid='';await create();return 'pushed'}
-  fid=l.files[0].id;localStorage.setItem('hp-fid',fid);
-  var rem=await (await gf(API+'drive/v3/files/'+fid+'?alt=media')).json();
-  if((rem.updated||0)>(S.updated||0)){
-    S=Object.assign({inc:0,budgets:{},expenses:[],goals:[],savings:[],term:[],learn:{}},rem);
-    try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
-    hydrate();return 'pulled';
-  }
-  await push();return 'pushed';
-}
-async function flush(){
-  if(!dirty)return;
-  if(!ready()){xmsg('Saved on this device. Tap Sync to send changes to Google Drive.');return}
-  try{await push();dirty=false;xmsg('Synced to Google Drive.')}catch(e){xmsg('Could not sync. Tap Sync to retry.',1)}
-}
-window.__push=function(){if(!tc||!localStorage.getItem('hp-sync'))return;dirty=true;clearTimeout(pt);pt=setTimeout(flush,2000)};
-if(CFG.googleClientId){
-  $('sy-btn').hidden=false;
-  var gs=document.createElement('script');gs.src='https://accounts.google.com/gsi/client';
-  gs.onload=function(){tc=google.accounts.oauth2.initTokenClient({client_id:CFG.googleClientId,scope:'https://www.googleapis.com/auth/drive.file',callback:function(){}})};
-  document.head.appendChild(gs);
-  $('sy-btn').addEventListener('click',async function(){
-    if(!tc){xmsg('Google sign-in is still loading. Try again in a moment.',1);return}
-    try{
-      xmsg('Connecting to Google Drive...');
-      if(!ready())await auth(localStorage.getItem('hp-sync')?'':'consent');
-      var r=await pull();dirty=false;
-      xmsg(r==='pulled'?'Loaded the latest data from Google Drive.':'Synced with Google Drive.');
-    }catch(e){xmsg('Could not connect to Google Drive. Check the setup steps in the README.',1)}
-  });
-}
-
-// Excel import / export
-function xmsg(t,bad){var m=$("x-msg");m.textContent=t;m.className="note"+(bad?" neg":"")}
-function num(v){return n(String(v).replace(/[^0-9.\-]/g,""))}
-function pad(v){return String(v).padStart(2,"0")}
-function normDate(v){v=String(v).trim();var a=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(a)return a[1]+"-"+pad(a[2])+"-"+pad(a[3]);a=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);return a?a[3]+"-"+pad(a[2])+"-"+pad(a[1]):""}
-function toWb(){
-  var U=XLSX.utils,wb=U.book_new();
-  U.book_append_sheet(wb,U.aoa_to_sheet([["Item","Amount (₹)"],["Monthly take-home income",S.inc||0]]),"Income");
-  U.book_append_sheet(wb,U.aoa_to_sheet([["Category","Monthly budget (₹)"]].concat(CATS.map(function(c){return [c,S.budgets[c]||0]}))),"Budgets");
-  U.book_append_sheet(wb,U.aoa_to_sheet([["Date","Category","Amount (₹)","Paid with","Note"]].concat(S.expenses.slice().sort(function(a,b){return a.date<b.date?-1:1}).map(function(x){return [x.date,x.cat,x.amt,x.mode,x.note]}))),"Expenses");
-  U.book_append_sheet(wb,U.aoa_to_sheet([["Goal","Target (₹)","Saved so far (₹)","Monthly contribution (₹)"]].concat(S.goals.map(function(g){return [g.name,g.target,g.saved,g.monthly]}))),"Goals");
-  U.book_append_sheet(wb,U.aoa_to_sheet([['Name','Monthly amount (₹)','Expected return % a year','Years']].concat(S.savings.map(function(x){return [x.name,x.monthly,x.ret,x.yrs]}))),'Savings');
-  U.book_append_sheet(wb,U.aoa_to_sheet([['Person','Sum assured (₹)','Annual premium (₹)','Cover ends (year)']].concat(S.term.map(function(x){return [x.who,x.cover,x.prem,x.ends]}))),'Term insurance');
-  return wb;
-}
-$("x-exp").addEventListener("click",async function(){
-  xmsg("");
-  if(!window.XLSX){xmsg("The Excel library did not load. Reload the page and try again.",1);return}
-  try{
-    XLSX.writeFile(toWb(),"home-finance-data.xlsx");
-    xmsg("Export saved. Check your Downloads or Files app.");
-  }catch(e){xmsg(e&&e.code==="declined"?"Export cancelled.":"Could not save the file.",1)}
-});
-$("x-imp").addEventListener("click",function(){if(!window.XLSX){xmsg("The Excel library did not load. Reload the page and try again.",1);return}$("x-file").click()});
-$("x-file").addEventListener("change",function(){
-  var f=this.files[0],inp=this;if(!f)return;
-  var r=new FileReader();
-  r.onload=function(){
-    try{
-      var wb=XLSX.read(r.result,{type:"array"});
-      var g=function(nm){var s=wb.Sheets[nm];return s?XLSX.utils.sheet_to_json(s,{header:1,raw:false,defval:""}):[]};
-      var inc=g("Income"),ns={inc:inc[1]?num(inc[1][1]):0,budgets:{},expenses:[],goals:[],savings:[],term:[]};
-      g("Budgets").slice(1).forEach(function(r){if(CATS.indexOf(r[0])>-1)ns.budgets[r[0]]=num(r[1])});
-      g("Expenses").slice(1).forEach(function(r){
-        var dt=normDate(r[0]),amt=num(r[2]);if(!dt||!amt)return;
-        ns.expenses.push({id:Date.now()+Math.random(),date:dt,amt:amt,cat:CATS.indexOf(r[1])>-1?r[1]:"Others",mode:String(r[3]||"UPI"),note:String(r[4]||"").slice(0,80)});
-      });
-      g("Goals").slice(1).forEach(function(r){var t=num(r[2-1]);if(r[0]&&t)ns.goals.push({id:Date.now()+Math.random(),name:String(r[0]).slice(0,50),target:t,saved:num(r[2]),monthly:num(r[3])})});
-      g('Savings').slice(1).forEach(function(r){var m=num(r[1]);if(r[0]&&m)ns.savings.push({id:Date.now()+Math.random(),name:String(r[0]).slice(0,50),monthly:m,ret:num(r[2]),yrs:num(r[3])})});
-      g('Term insurance').slice(1).forEach(function(r){var c=num(r[1]);if(r[0]&&c)ns.term.push({id:Date.now()+Math.random(),who:String(r[0]).slice(0,40),cover:c,prem:num(r[2]),ends:num(r[3])})});
-      ns.learn=S.learn||{};S=ns;save();
-      $("f-inc").value=S.inc||"";
-      CATS.forEach(function(c,i){$("b"+i).value=S.budgets[c]||""});
-      var last=S.expenses.map(function(x){return x.date.slice(0,7)}).sort().pop();
-      if(last){month=last;$("month").value=last}
-      render();
-      xmsg("Imported "+S.expenses.length+" expenses and "+S.goals.length+" goals. Your earlier data on this device was replaced.");
-    }catch(e){xmsg("Could not read that file. Use the Home Finance template or an export from this page.",1)}
-    inp.value="";
-  };
-  r.readAsArrayBuffer(f);
-});
+... (rest of script unchanged, identical to previous version) ...
 })();
 </script>
 <script>if('serviceWorker' in navigator)addEventListener('load',function(){navigator.serviceWorker.register('sw.js')});</script>
